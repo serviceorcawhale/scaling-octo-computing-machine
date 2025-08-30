@@ -1,0 +1,190 @@
+{% extends 'investment_app/base.html' %}
+{% load static %}
+{% load math_filters %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>Grow Your Crypto Assets</h1>
+            <p>Join thousands of investors earning daily returns on their cryptocurrency investments. Secure, transparent, and profitable.</p>
+            <div class="hero-buttons">
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+                {% comment %} <a href="{% url 'login' %}" class="btn btn-secondary">Dashboard</a> {% endcomment %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why Choose Orcawhale</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Daily Returns</h3>
+                <p>Earn consistent daily yields on your investments with our optimized trading strategies.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure Wallets</h3>
+                <p>Your funds are stored in secure, multi-signature cold wallets with insurance protection.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <h3>Multiple Crypto</h3>
+                <p>Invest in various cryptocurrencies including Bitcoin, Ethereum, and USDT.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>24/7 Support</h3>
+                <p>Our dedicated support team is available around the clock to assist you.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Investment Plans Section -->
+<section class="plans" id="plans">
+    <div class="container">
+        <h2 class="section-title">Investment Plans</h2>
+        <p class="section-subtitle">Choose a plan that fits your investment goals</p>
+        
+        <div class="plans-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Min Investment</th>
+                        <th>Max Investment</th>
+                        <th>Daily Yield</th>
+                        {% comment %} <th>Days to $5 Withdrawal</th> {% endcomment %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan in plans %}
+                    <tr>
+                        <td>{{ plan.name }}</td>
+                        <td>${{ plan.min_amount }}</td>
+                        <td>{% if plan.max_amount %}${{ plan.max_amount }}{% else %}Unlimited{% endif %}</td>
+                        <td>{{ plan.base_daily_yield|floatformat:2 }}%</td>
+                        {% comment %} <td>
+                            {% with daily_profit=plan.min_amount|multiply:plan.base_daily_yield %}
+                            {% if daily_profit >= 5 %}
+                                &lt; 1 Day
+                            {% else %}
+                                {{ 5|divide:daily_profit|floatformat:0 }} Days
+                            {% endif %}
+                            {% endwith %}
+                        </td> {% endcomment %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Register</h3>
+                <p>Create your account in minutes and complete verification.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Deposit Crypto</h3>
+                <p>Fund your account with Bitcoin, Ethereum, or USDT.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Earn Daily</h3>
+                <p>Watch your investment grow with daily yield payments.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Withdraw Profits</h3>
+                <p>Withdraw your earnings anytime to your wallet.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq" id="faq">
+    <div class="container">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How are profits generated?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Our expert trading team uses algorithmic trading, arbitrage, and staking strategies to generate consistent returns on your investments.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Is my investment secure?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, we use multi-signature cold wallets for fund storage and maintain insurance coverage on all digital assets.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How often can I withdraw?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>You can withdraw your earnings anytime once you've reached the minimum withdrawal amount of $15 equivalent.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>What cryptocurrencies do you accept?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>We currently accept Bitcoin (BTC), Ethereum (ETH), and Tether (USDT) for deposits and withdrawals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ toggle functionality
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            const icon = question.querySelector('i');
+            
+            answer.classList.toggle('active');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        });
+    });
+});
+</script>
+{% endblock %}

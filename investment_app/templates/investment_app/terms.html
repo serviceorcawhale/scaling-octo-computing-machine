@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Orca Whale Investment</title>
+    <style>
+        :root {
+            --primary-blue: #1976d2;
+            --light-blue: #2196f3;
+            --lighter-blue: #bbdefb;
+            --background-blue: #e3f2fd;
+            --text-dark: #1a237e;
+            --text-light: #ffffff;
+            --divider: #90caf9;
+            --success-green: #4caf50;
+            --warning-orange: #ff9800;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-blue);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 2.8rem;
+        }
+        
+        .logo span {
+            color: var(--text-dark);
+        }
+        
+        h1 {
+            color: var(--text-dark);
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--divider);
+        }
+        
+        h3 {
+            color: var(--primary-blue);
+            font-size: 1.4rem;
+            margin: 20px 0 10px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        
+        .highlight {
+            background-color: var(--lighter-blue);
+            padding: 15px;
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .warning {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid var(--warning-orange);
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .risk-disclaimer {
+            background-color: #ffebee;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ffcdd2;
+            margin: 25px 0;
+        }
+        
+        .last-updated {
+            text-align: right;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .button:hover {
+            background-color: var(--light-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid var(--divider);
+        }
+        
+        .investment-details {
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid var(--success-green);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .logo-icon {
+                font-size: 2.2rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            h3 {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        @media (max-width: 300px) {
+            body {
+                padding: 10px;
+            }
+            
+            .logo {
+                font-size: 1.7rem;
+            }
+            
+            .logo-icon {
+                font-size: 1.9rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .button {
+                padding: 10px;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">🐋</span>
+            Orca Whale
+        </div>
+        <h1>Terms of Service</h1>
+        <p class="last-updated">Last Updated: October 28, 2023</p>
+    </header>
+    
+    <div class="container">
+        <div class="risk-disclaimer">
+            <h3>⚠️ Important Risk Disclaimer</h3>
+            <p>Cryptocurrency investments are highly volatile and subject to market risks. There is a possibility of losing your principal investment. Past performance is not indicative of future results.</p>
+        </div>
+        
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing or using Orca Whale Investment's services, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing our services.</p>
+        
+        <h2>2. Investment Services</h2>
+        <p>Orca Whale Investment provides cryptocurrency investment management services with daily returns based on trading performance.</p>
+        
+        <div class="investment-details">
+            <h3>Investment Process</h3>
+            <ol>
+                <li>Users deposit cryptocurrency into their Orca Whale Investment account</li>
+                <li>Funds are pooled and used for algorithmic trading strategies</li>
+                <li>Daily percentage returns are distributed to users' accounts</li>
+                <li>Returns are calculated based on the investment plan selected</li>
+                <li>Investment periods range from 30 to 365 days depending on the plan</li>
+            </ol>
+        </div>
+        
+        <h2>3. User Accounts</h2>
+        <p>To use our services, you must create an account and provide accurate information. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+        
+        <div class="highlight">
+            <h3>Account Verification</h3>
+            <p>For security and regulatory compliance, we may require identity verification documents before processing withdrawals above certain thresholds.</p>
+        </div>
+        
+        <h2>4. Investment Plans & Returns</h2>
+        <p>Orca Whale Investment offers several investment plans with varying durations and daily return rates:</p>
+        
+        <ul>
+            <li><strong>Basic Plan:</strong> 30-day duration, 1.5% daily returns</li>
+            <li><strong>Premium Plan:</strong> 90-day duration, 2.2% daily returns</li>
+            <li><strong>Whale Plan:</strong> 180-day duration, 3.0% daily returns</li>
+            <li><strong>Orca Plan:</strong> 365-day duration, 4.0% daily returns</li>
+        </ul>
+        
+        <div class="warning">
+            <p><strong>Note:</strong> Daily returns are based on trading performance and are not guaranteed. While we strive to maintain consistent returns, market conditions may affect performance.</p>
+        </div>
+        
+        <h2>5. Deposits and Withdrawals</h2>
+        <p>All deposits must be made in cryptocurrency to the designated wallet addresses provided in your account dashboard.</p>
+        
+        <h3>Withdrawal Policy</h3>
+        <ul>
+            <li>Withdrawal requests are processed within 24-48 hours</li>
+            <li>A small network fee is deducted for blockchain transactions</li>
+            <li>Initial investment capital is locked for the duration of the selected plan</li>
+            <li>Daily returns can be withdrawn or compounded</li>
+        </ul>
+        
+        <h2>6. Risk Disclosure</h2>
+        <p>Cryptocurrency investments are subject to high market risk. The value of your investment may fluctuate, and there is a possibility of losing your principal investment. Past performance is not indicative of future results.</p>
+        
+        <h2>7. Investment Decisions</h2>
+        <p>You acknowledge that all investment decisions are made at your own risk. Orca Whale Investment provides tools and information but does not guarantee investment returns.</p>
+        
+        <h2>8. Fees and Charges</h2>
+        <p>Our fee structure is transparently displayed on our platform:</p>
+        <ul>
+            <li>No deposit fees</li>
+            <li>5% performance fee on profits</li>
+            <li>Network fees for withdrawals</li>
+            <li>No hidden charges</li>
+        </ul>
+        
+        <h2>9. Intellectual Property</h2>
+        <p>All content on the Orca Whale Investment platform, including text, graphics, logos, and software, is the property of Orca Whale Investment and is protected by intellectual property laws.</p>
+        
+        <h2>10. Termination</h2>
+        <p>We reserve the right to terminate or suspend your account at our sole discretion, without prior notice, for conduct that we believe violates these Terms of Service or is harmful to other users.</p>
+        
+        <h2>11. Limitation of Liability</h2>
+        <p>Orca Whale Investment shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our services, including but not limited to market losses.</p>
+        
+        <h2>12. Governing Law</h2>
+        <p>These Terms of Service shall be governed by and construed in accordance with the laws of the jurisdiction in which Orca Whale Investment is registered, without regard to its conflict of law provisions.</p>
+        
+        <h2>13. Changes to Terms</h2>
+        <p>We reserve the right to modify these terms at any time. We will provide notice of significant changes through our platform. Continued use of our services after changes constitutes acceptance of the modified terms.</p>
+        
+        <div class="nav-buttons">
+            <a href="{% url 'index' %}" class="button">Back to Home</a>
+            <a href="{% url 'privacy' %}" class="button">Privacy Policy</a>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; {% now "Y" %} Orca Whale Investment. All rights reserved.</p>
+        <p>For support: service.orcawhale@hotmail.com</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,148 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Withdraw Funds{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Balance Info -->
+    <div class="balance-card">
+        <div class="balance-info">
+            <span>Available for Withdrawal</span>
+            <h2>${{ profile.earned_balance|floatformat:2 }}</h2>
+        </div>
+        <div class="balance-note">
+            <i class="fas fa-info-circle"></i>
+            <span>Minimum withdrawal: $5.00</span>
+        </div>
+    </div>
+
+    <!-- Withdrawal Form -->
+    <div class="form-card">
+        <div class="form-header">
+            <h2>Request Withdrawal</h2>
+            <p>Withdraw your earnings to your wallet</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Currency</label>
+                <div class="currency-selector">
+                    {% for value, name in form.currency.field.choices %}
+                    <label class="currency-option {% if form.currency.value == value %}active{% endif %}">
+                        <input type="radio" name="currency" value="{{ value }}" 
+                               {% if form.currency.value == value %}checked{% endif %}>
+                        <span class="currency-icon {{ value|lower }}">
+                            <i class="fab fa-{{ value|lower }}"></i>
+                        </span>
+                        <span class="currency-name">{{ name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                <div class="error-text">{{ form.amount.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Minimum: $15.00 equivalent</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Destination Wallet Address</label>
+                {{ form.destination_address }}
+                <div class="form-help">Enter your external wallet address carefully</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" required>
+                    <span class="checkmark"></span>
+                    I confirm this address is correct and understand transactions cannot be reversed
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                Request Withdrawal
+            </button>
+        </form>
+    </div>
+
+    <!-- Recent Withdrawals -->
+    <div class="section-header">
+        <h2>Recent Withdrawals</h2>
+        <a href="{% url 'transactions' %}" class="btn-link">View All</a>
+    </div>
+
+    {% if recent_withdrawals %}
+    <div class="transactions-list">
+        {% for withdrawal in recent_withdrawals %}
+        <div class="transaction-item">
+            <div class="transaction-icon withdrawal">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="transaction-details">
+                <h4>Withdrawal - {{ withdrawal.currency }}</h4>
+                <p>{{ withdrawal.amount }} {{ withdrawal.currency }}</p>
+                <small>To: {{ withdrawal.destination_address|truncatechars:12 }}</small>
+            </div>
+            <div class="transaction-status">
+                <span class="status status-{{ withdrawal.status }}">{{ withdrawal.status }}</span>
+                <small>{{ withdrawal.created_at|timesince }} ago</small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-arrow-up"></i>
+        <h3>No Withdrawals Yet</h3>
+        <p>Your withdrawal history will appear here</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Currency selection
+    const currencyOptions = document.querySelectorAll('.currency-option');
+    currencyOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            currencyOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            this.querySelector('input').checked = true;
+        });
+    });
+
+    // Max amount button
+    const amountInput = document.querySelector('input[name="amount"]');
+    const maxButton = document.createElement('button');
+    maxButton.type = 'button';
+    maxButton.className = 'btn-max';
+    maxButton.textContent = 'MAX';
+    maxButton.addEventListener('click', function() {
+        amountInput.value = '{{ profile.earned_balance|floatformat:2 }}';
+    });
+    
+    const amountGroup = amountInput.closest('.form-group');
+    amountGroup.style.position = 'relative';
+    amountGroup.appendChild(maxButton);
+});
+</script>
+{% endblock %}

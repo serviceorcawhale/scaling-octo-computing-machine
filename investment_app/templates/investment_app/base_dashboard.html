@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Orcawhale Investment Platform</title>
+    {% comment %} <link rel="stylesheet" href="{% static 'investment_app/css/style.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'investment_app/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="dashboard-body">
+    <!-- Top Bar (Mobile Only) -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            <div class="header-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <a href="{% url 'profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <button class="profile-btn">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+    <nav class="bottom-nav">
+        <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'invest' %}" class="nav-item {% if request.resolver_match.url_name == 'invest' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i>
+            <span>Invest</span>
+        </a>
+        <a href="{% url 'deposit' %}" class="nav-item {% if request.resolver_match.url_name == 'deposit' %}active{% endif %}">
+            <i class="fas fa-arrow-down"></i>
+            <span>Deposit</span>
+        </a>
+        <a href="{% url 'withdraw' %}" class="nav-item {% if request.resolver_match.url_name == 'withdraw' %}active{% endif %}">
+            <i class="fas fa-arrow-up"></i>
+            <span>Withdraw</span>
+        </a>
+        <a href="{% url 'profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+        <a href="{% url 'referral' %}" class="nav-item {% if request.resolver_match.url_name == 'referral' %}active{% endif %}">
+            <i class="fas fa-user-plus"></i>
+            <span>Referral</span>
+        </a>
+    </nav>
+
+    <!-- Desktop Sidebar (Hidden on Mobile) -->
+    <aside class="desktop-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-coins"></i>
+                <span>Orcawhale</span>
+            </div>
+        </div>
+        
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <h3>{{ user.username }}</h3>
+                <p>Member since {{ user.date_joined|date:"M Y" }}</p>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'invest' %}" class="nav-item {% if request.resolver_match.url_name == 'invest' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Invest</span>
+            </a>
+            <a href="{% url 'deposit' %}" class="nav-item {% if request.resolver_match.url_name == 'deposit' %}active{% endif %}">
+                <i class="fas fa-arrow-down"></i>
+                <span>Deposit</span>
+            </a>
+            <a href="{% url 'withdraw' %}" class="nav-item {% if request.resolver_match.url_name == 'withdraw' %}active{% endif %}">
+                <i class="fas fa-arrow-up"></i>
+                <span>Withdraw</span>
+            </a>
+            <a href="{% url 'transactions' %}" class="nav-item {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}">
+                <i class="fas fa-history"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="{% url 'profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="{% url 'referral' %}" class="nav-item {% if request.resolver_match.url_name == 'referral' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                <span>Referral Program</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <script src="{% static 'investment_app/js/dashboard.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,129 @@
+{% extends 'investment_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+    <div class="auth-card" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px;">
+        <div class="auth-header" style="text-align: center; margin-bottom: 2rem;">
+            <a href="{% url 'index' %}" class="auth-logo" style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-coins"></i> Orcawhale
+            </a>
+            <h1 style="margin: 1rem 0 0.5rem 0; color: var(--text-primary);">Create Account</h1>
+            <p style="color: var(--text-secondary);">Join thousands of investors</p>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-error">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required 
+                       value="{{ form.username.value|default:'' }}">
+                {% if form.username.errors %}
+                <div style="color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.username.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" required 
+                       value="{{ form.email.value|default:'' }}">
+                {% if form.email.errors %}
+                <div style="color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.email.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="password1" class="form-control" required>
+                    <button type="button" class="password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+
+                    </button>
+                </div>
+                {% if form.password1.errors %}
+                <div style="color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.password1.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <div style="position: relative;">
+                    <input type="password" name="password2" class="form-control" required>
+                    <button type="button" class="password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+
+                    </button>
+                </div>
+                {% if form.password2.errors %}
+                <div style="color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.password2.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                 <label class="form-label">Referral Code (Optional)</label>
+                <input type="text" name="referral_code" class="form-control" 
+                value="{{ request.GET.ref|default:'' }}" 
+           placeholder="Enter referral code if you have one">
+            </div>
+            <div class="form-group">
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="terms_accepted" required style="margin-top: 0.25rem;">
+                    <span style="font-size: 0.875rem;">
+                        I agree to the <a href="{% url 'terms' %}" style="color: var(--primary-color);">Terms of Service</a> 
+                        and <a href="{% url 'privacy' %}" style="color: var(--primary-color);">Privacy Policy</a>
+                    </span>
+                </label>
+                {% if form.terms_accepted.errors %}
+                <div style="color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.terms_accepted.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1.5rem;">
+                Create Account
+            </button>
+        </form>
+
+        <div class="auth-footer" style="text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); margin: 0;">
+                Already have an account? 
+                <a href="{% url 'login' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                    Sign in
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+    
+    passwordToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    });
+});
+</script>
+{% endblock %}

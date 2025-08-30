@@ -1,0 +1,275 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+{% load math_filters %}
+
+{% block page_title %}Investment Plans{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Balance Info -->
+    <div class="balance-card">
+        <div class="balance-info">
+            <span>Available Balance</span>
+            <h2>${{ user.userprofile.principal_balance|floatformat:2 }}</h2>
+        </div>
+        <div class="balance-actions">
+            <a href="{% url 'deposit' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Add Funds
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Investment Plans -->
+    <div class="section-header">
+        <h2>Choose Investment Plan</h2>
+    </div>
+
+    <div class="plans-grid">
+        {% for plan in plans %}
+        <div class="plan-card">
+            <div class="plan-header">
+                <h3>{{ plan.name }}</h3>
+                <div class="plan-yield">
+                    {{ plan.base_daily_yield|floatformat:4 }}% daily
+                </div>
+            </div>
+            
+            <div class="plan-details">
+                <div class="plan-detail">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Min: ${{ plan.min_amount }}</span>
+                </div>
+                {% if plan.max_amount %}
+                <div class="plan-detail">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Max: ${{ plan.max_amount }}</span>
+                </div>
+                {% endif %}
+                {% if plan.duration_days %}
+                <div class="plan-detail">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ plan.duration_days }} days</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <form method="post" class="invest-form">
+                {% csrf_token %}
+                <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" name="amount" class="form-control" 
+                           min="{{ plan.min_amount }}" 
+                           {% if plan.max_amount %}max="{{ plan.max_amount }}"{% endif %}
+                           step="0.01" required
+                           placeholder="Enter amount">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    Invest Now
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Current Investments -->
+    <div class="section-header">
+        <h2>Your Investments</h2>
+    </div>
+
+    {% if current_investments %}
+    <div class="investments-list">
+        {% for investment_data in current_investments %}
+        <div class="investment-item">
+            <div class="investment-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="investment-details">
+                <h4>{{ investment_data.investment.plan.name }}</h4>
+                <p>${{ investment_data.investment.amount }} invested</p>
+                <small>Started {{ investment_data.investment.start_date|timesince }} ago</small>
+            </div>
+            <div class="investment-status">
+                <span class="status status-active">Active</span>
+                <span class="investment-profit">+${{ investment_data.total_profit|floatformat:2 }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chart-line"></i>
+        <h3>No Active Investments</h3>
+        <p>Choose a plan above to start investing</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Mobile-first responsive styles */
+.plans-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.plan-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.plan-card:active {
+    transform: scale(0.98);
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.plan-yield {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #28a745;
+}
+
+.plan-details {
+    margin-bottom: 20px;
+}
+
+.plan-detail {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.plan-detail i {
+    margin-right: 10px;
+    width: 16px;
+    color: #6c757d;
+}
+
+.invest-form {
+    margin-top: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-block:active {
+    background-color: #0069d9;
+}
+
+/* For slightly wider screens (over 300px) */
+@media (min-width: 320px) {
+    .plan-card {
+        padding: 20px 16px;
+    }
+    
+    .plan-header h3 {
+        font-size: 1.25rem;
+    }
+}
+
+/* For tablets and larger devices */
+@media (min-width: 640px) {
+    .plans-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* For desktop screens */
+@media (min-width: 1024px) {
+    .plans-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* For very large screens */
+@media (min-width: 1280px) {
+    .plans-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-fill amount with plan minimum when clicking plan card
+    const planCards = document.querySelectorAll('.plan-card');
+    planCards.forEach(card => {
+        const form = card.querySelector('form');
+        const amountInput = form.querySelector('input[name="amount"]');
+        const minAmount = parseFloat(amountInput.getAttribute('min'));
+        
+        card.addEventListener('click', function(e) {
+            if (!e.target.closest('form')) {
+                amountInput.value = minAmount;
+                amountInput.focus();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}                              

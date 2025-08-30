@@ -1,0 +1,790 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Profile & Settings{% endblock %}
+
+{% block styles %}
+<style>
+:root {
+    --primary-blue: #3498db;
+    --light-blue: #e7f2fa;
+    --medium-blue: #a8d5ff;
+    --dark-blue: #2980b9;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-color: #e0e7ff;
+    --success: #27ae60;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+}
+
+.dashboard-content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--border-color);
+}
+
+.profile-avatar {
+    position: relative;
+    margin-right: 25px;
+}
+
+.profile-avatar i {
+    font-size: 80px;
+    color: var(--primary-blue);
+}
+
+.avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.profile-info h1 {
+    margin: 0 0 5px 0;
+    color: var(--text-dark);
+    font-size: 24px;
+}
+
+.profile-info > p {
+    margin: 0 0 15px 0;
+    color: var(--text-light);
+}
+
+.profile-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat {
+    text-align: center;
+    padding: 10px 15px;
+    background: var(--light-blue);
+    border-radius: 8px;
+    min-width: 90px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 18px;
+    color: var(--primary-blue);
+}
+
+.stat small {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+/* Navigation Tabs */
+.profile-nav {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.profile-nav-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.profile-nav-item:hover {
+    color: var(--primary-blue);
+    background: var(--light-blue);
+}
+
+.profile-nav-item.active {
+    color: var(--primary-blue);
+    border-bottom: 3px solid var(--primary-blue);
+    background: var(--light-blue);
+}
+
+/* Section Cards */
+.section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--border-color);
+    display: none;
+}
+
+.section-card.active {
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+    margin: 0;
+    color: var(--text-dark);
+    font-size: 20px;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.info-item span {
+    color: var(--text-dark);
+    font-size: 15px;
+}
+
+.status-active {
+    color: var(--success) !important;
+    font-weight: 600;
+}
+
+/* Security Items */
+.security-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.security-item, .notification-item, .danger-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 8px;
+    background: var(--light-blue);
+}
+
+.security-info, .notification-info, .danger-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.security-info i, .kyc-info i {
+    font-size: 20px;
+    color: var(--primary-blue);
+    width: 30px;
+    text-align: center;
+}
+
+.security-info h4, .notification-info h4, .danger-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-dark);
+}
+
+.security-info p, .notification-info p, .danger-info p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+/* Form Styles */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Danger Zone */
+.danger-zone {
+    border-left: 4px solid var(--danger);
+}
+
+.danger-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--dark-blue);
+}
+
+.btn-secondary {
+    background: var(--light-blue);
+    color: var(--primary-blue);
+    border: 1px solid var(--medium-blue);
+}
+
+.btn-secondary:hover {
+    background: var(--medium-blue);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* KYC Section */
+.kyc-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.kyc-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.kyc-verified {
+    background: #d4edda;
+    color: #155724;
+}
+
+.kyc-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.kyc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 8px;
+    background: var(--light-blue);
+}
+
+.kyc-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.kyc-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Toast notification */
+.toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background: var(--text-dark);
+    color: white;
+    border-radius: 6px;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Placeholder sections for removed forms */
+.placeholder-section {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+}
+
+.placeholder-section i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: var(--medium-blue);
+}
+
+.placeholder-section h3 {
+    margin: 0 0 10px 0;
+    color: var(--text-dark);
+}
+
+.placeholder-section p {
+    margin: 0;
+    max-width: 500px;
+    margin: 0 auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        {% comment %} <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+            <button class="avatar-edit">
+                <i class="fas fa-camera"></i>
+            </button>
+        </div> {% endcomment %}
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p>Member since {{ user.date_joined|date:"M Y" }}</p>
+            <div class="profile-stats">
+                <span class="stat">
+                    <strong>{{ investments_count }}</strong>
+                    <small>Investments</small>
+                </span>
+                <span class="stat">
+                    <strong>{{ completed_transactions }}</strong>
+                    <small>Transactions</small>
+                </span>
+                <span class="stat">
+                    <strong>{{ days_active }}</strong>
+                    <small>Days active</small>
+                </span>
+            </div>
+        </div>
+    </div>
+    <!-- Overview Section -->
+    <div class="section-card active" id="overview-section">
+        <!-- KYC Verification Section -->
+        <div class="section-header">
+            <h2>Identity Verification (KYC)</h2>
+        </div>
+        
+        <div class="kyc-item">
+            <div class="kyc-info">
+                <i class="fas fa-id-card"></i>
+                <div>
+                    <div class="info-item">
+                        <label>KYC Status</label>
+                        <span class="status 
+                            {% if kyc_status == 'verified' %}status-active{% endif %}
+                            {% if kyc_status == 'pending' or kyc_status == 'under_review' %}status-pending{% endif %}
+                            {% if kyc_status == 'rejected' %}status-rejected{% endif %}">
+                            {% if kyc_status %}
+                                {{ kyc_status|title }}
+                            {% else %}
+                                Not Started
+                            {% endif %}
+                        </span>
+                    </div>
+                    <p>Complete identity verification to access all platform features</p>
+                </div>
+            </div>
+            <div class="kyc-actions">
+                {% if kyc_status == "verified" %}
+                    <button class="btn btn-secondary">View Details</button>
+                {% else %}
+                    <a href="{% url 'verification' %}" class="btn btn-secondary">Start Verification</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Information -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Account Information</h2>
+            <a href="{% url 'edit_account' %}">
+            <button class="btn btn-secondary btn-sm">Edit</button>
+            </a>
+        </div>        
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Username:</label>
+                <span>{{ user.username }}</span>
+            </div>
+            
+            <div class="info-item">
+                <label>Email Address:</label>
+                <span>{{ user.email }}</span>
+            </div>
+            
+            <div class="info-item">
+                <label>First Name:</label>
+                <span>{{ user.first_name|default:"Not set" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <label>Last Name:</label>
+                <span>{{ user.last_name|default:"Not set" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <label>Phone Number:</label>
+                <span>{{ profile.phone_number|default:"Not set" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <label>Account Status</label>
+                <span class="status status-active">Verified</span>
+            </div>
+            <div class="info-item">
+                <label>Member Since:</label>
+                <span>{{ user.date_joined|date:"M d, Y" }}</span>
+            </div>
+            <div class="info-item">
+                <label>Last Login:</label>
+                <span>{{ user.last_login|date:"M d, Y H:i" }}</span>
+            </div>            
+            <div class="info-item">
+               <label>Account Tier</label>
+                <span>Standard</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Section -->
+    <div class="section-card" id="security-section">
+        <div class="section-header">
+            <h2>Security</h2>
+        </div>
+        
+        <div class="security-items">
+            <div class="security-item">
+                <div class="security-info">
+                    <i class="fas fa-lock"></i>
+                    <div>
+                        <h4>Password</h4>
+                    </div>
+                </div>
+                <a href="{% url 'change_password' %}">
+                <button class="btn btn-secondary" id="nav-to-password">Change Password</button>
+                </a>
+            </div>
+
+            <div class="security-item">
+                <div class="security-info">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>
+                        <h4>Two-Factor Authentication</h4>
+                        <p>Add an extra layer of security</p>
+                    </div>
+                </div>
+                {% if profile.two_factor_enabled %}
+                    <form method="POST" action="{% url 'disable_2fa' %}" id="disable-2fa-form" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">Disable</button>
+                    </form>
+                {% else %}
+                    <form method="POST" action="{% url 'enable_2fa' %}" id="enable-2fa-form" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">Enable</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone Section -->
+    <div class="section-card danger-zone" id="danger-zone-section">
+        <div class="section-header">
+            <h2>Danger Zone</h2>
+        </div>
+        
+        <div class="danger-actions">
+            <div class="danger-item">
+                <div class="danger-info">
+                    <h4>Delete Account</h4>
+                    <p>Permanently delete your account and all data</p>
+                </div>
+                <button class="btn btn-danger" id="delete-account-btn">Delete Account</button>
+            </div>
+            
+            {% comment %} <div class="danger-item">
+                <div class="danger-info">
+                    <h4>Export Data</h4>
+                    <p>Download all your account data</p>
+                </div>
+                <button class="btn btn-secondary">Export Data</button>
+            </div> {% endcomment %}
+        </div>
+        
+        <!-- Delete Account Form (initially hidden) -->
+        <div id="delete-account-form-container" style="display: none; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <p>Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently removed.</p>
+            
+            <form method="POST" action="{% url 'delete_account' %}" id="delete-account-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="confirm_password">Enter your password to confirm</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <div class="error-message" id="confirm_password-error"></div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-delete">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <a href="{% url 'logout' %}" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" id="toast"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Delete account button functionality
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    const deleteAccountFormContainer = document.getElementById('delete-account-form-container');
+    const cancelDeleteBtn = document.getElementById('cancel-delete');
+    
+    if (deleteAccountBtn && deleteAccountFormContainer) {
+        deleteAccountBtn.addEventListener('click', function() {
+            deleteAccountFormContainer.style.display = 'block';
+            this.style.display = 'none';
+        });
+    }
+    
+    if (cancelDeleteBtn && deleteAccountFormContainer) {
+        cancelDeleteBtn.addEventListener('click', function() {
+            deleteAccountFormContainer.style.display = 'none';
+            deleteAccountBtn.style.display = 'block';
+        });
+    }
+    
+    // Form submission handling
+    const deleteAccountForm = document.getElementById('delete-account-form');
+    
+    // Delete Account Form
+    deleteAccountForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('confirm_password').value;
+        
+        if (!password) {
+            document.getElementById('confirm_password-error').textContent = 'Password is required';
+            document.getElementById('confirm_password-error').style.display = 'block';
+            return;
+        } else {
+            document.getElementById('confirm_password-error').style.display = 'none';
+        }
+        
+        // Submit the form via AJAX to handle password verification
+        const formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                document.getElementById('confirm_password-error').textContent = data.error || 'Incorrect password';
+                document.getElementById('confirm_password-error').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.');
+        });
+    });
+    
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        if (toast) {
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    }
+    window.showToast = showToast;
+    
+    // 2FA form handling
+    const enable2faForm = document.getElementById('enable-2fa-form');
+    const disable2faForm = document.getElementById('disable-2fa-form');
+    
+    if (enable2faForm) {
+        enable2faForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message);
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        });
+    }
+    
+    if (disable2faForm) {
+        disable2faForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message);
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

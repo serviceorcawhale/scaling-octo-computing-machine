@@ -1,0 +1,247 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Referral Program{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Referral Header -->
+    <div class="referral-header">
+        <div class="referral-hero">
+            <h1>Invite Friends & Earn</h1>
+            <p>Get $0.50 for each friend who signs up and 0.12% of their investments</p>
+        </div>
+        
+        <div class="referral-stats">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Total Referrals</span>
+                    <h3>{{ total_referrals }}</h3>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Active Referrals</span>
+                    <h3>{{ active_referrals }}</h3>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Total Earnings</span>
+                    <h3>${{ total_earnings|floatformat:2 }}</h3>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Pending Earnings</span>
+                    <h3>${{ pending_earnings|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Referral -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Your Referral Link</h2>
+        </div>
+        
+        <div class="referral-share">
+            <div class="referral-input-group">
+                <input type="text" id="referralLink" value="{{ request.scheme }}://{{ request.get_host }}{% url 'register' %}?ref={{ profile.referral_code }}" 
+                       readonly class="form-control">
+                <button onclick="copyReferralLink()" class="btn btn-primary">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+            
+            <div class="referral-code">
+                <span>Your Code: </span>
+                <strong>{{ profile.referral_code }}</strong>
+            </div>
+            
+            <div class="share-buttons">
+                <button class="btn btn-share whatsapp" onclick="shareWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button class="btn btn-share telegram" onclick="shareTelegram()">
+                    <i class="fab fa-telegram"></i> Telegram
+                </button>
+                <button class="btn btn-share facebook" onclick="shareFacebook()">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+                <button class="btn btn-share twitter" onclick="shareTwitter()">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>How It Works</h2>
+        </div>
+        
+        <div class="referral-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Share Your Link</h4>
+                    <p>Share your unique referral link with friends</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>They Sign Up</h4>
+                    <p>Your friends sign up using your referral link</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Earn $0.50</h4>
+                    <p>You instantly get $0.50 when they complete registration</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Earn 0.12% Commission</h4>
+                    <p>Earn 0.12% of every investment your referrals make</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Earnings -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Earnings History</h2>
+        </div>
+        
+        {% if referral_earnings %}
+        <div class="earnings-list">
+            {% for earning in referral_earnings %}
+            <div class="earning-item">
+                <div class="earning-icon">
+                    <i class="fas {% if earning.earning_type == 'signup' %}fa-user-plus{% else %}fa-chart-line{% endif %}"></i>
+                </div>
+                <div class="earning-details">
+                    <h4>{{ earning.get_earning_type_display }}</h4>
+                    <p>{{ earning.description }}</p>
+                    <small>{{ earning.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+                <div class="earning-amount">
+                    <span class="amount-positive">+${{ earning.amount|floatformat:2 }}</span>
+                    <span class="status status-{% if earning.is_paid %}approved{% else %}pending{% endif %}">
+                        {% if earning.is_paid %}Paid{% else %}Pending{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-coins"></i>
+            <h3>No Earnings Yet</h3>
+            <p>Your referral earnings will appear here</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Your Referrals -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>Your Referrals</h2>
+        </div>
+        
+        {% if referrals %}
+        <div class="referrals-list">
+            {% for referral in referrals %}
+            <div class="referral-item">
+                <div class="referral-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="referral-details">
+                    <h4>{{ referral.referred_user.username }}</h4>
+                    <p>Joined {{ referral.created_at|date:"M d, Y" }}</p>
+                    <span class="status status-{% if referral.is_active %}active{% else %}inactive{% endif %}">
+                        {% if referral.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <div class="referral-earnings">
+                    <span>${{ referral.total_earnings|default:0|floatformat:2 }}</span>
+                    <small>Total Earned</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>No Referrals Yet</h3>
+            <p>Start sharing your link to get referrals</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyReferralLink() {
+    const input = document.getElementById('referralLink');
+    input.select();
+    document.execCommand('copy');
+    showToast('Referral link copied to clipboard!');
+}
+
+function shareWhatsApp() {
+    const text = "Join me on Orcawhale and earn daily returns! Use my referral link: ";
+    const url = document.getElementById('referralLink').value;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + url)}`, '_blank');
+}
+
+function shareTelegram() {
+    const text = "Join me on Orcawhale and earn daily returns! Use my referral link: ";
+    const url = document.getElementById('referralLink').value;
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareFacebook() {
+    const url = document.getElementById('referralLink').value;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareTwitter() {
+    const text = "Join me on Orcawhale and earn daily returns!";
+    const url = document.getElementById('referralLink').value;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+// Load referral stats on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any initialization code here
+});
+</script>
+{% endblock %}

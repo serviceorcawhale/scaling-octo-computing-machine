@@ -1,0 +1,67 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}KYC Status{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>KYC Verification Status</h2>
+        </div>
+        
+        <div style="text-align: center; padding: 30px 0;">
+            <div class="kyc-status {{ kyc.get_status_class }}" style="font-size: 18px; padding: 10px 20px; margin-bottom: 20px;">
+                Status: {{ kyc.get_status_display }}
+            </div>
+            
+            <div style="max-width: 400px; margin: 0 auto;">
+                {% if kyc.status == 'pending' %}
+                <i class="fas fa-clock" style="font-size: 64px; color: #f39c12; margin-bottom: 20px;"></i>
+                <h3>Verification Pending</h3>
+                <p>Your KYC verification is in queue for review. This process usually takes 24-48 hours.</p>
+                
+                {% elif kyc.status == 'under_review' %}
+                <i class="fas fa-search" style="font-size: 64px; color: #3498db; margin-bottom: 20px;"></i>
+                <h3>Under Review</h3>
+                <p>Your documents are currently being reviewed by our team.</p>
+                
+                {% elif kyc.status == 'approved' %}
+                <i class="fas fa-check-circle" style="font-size: 64px; color: #27ae60; margin-bottom: 20px;"></i>
+                <h3>Verification Successful</h3>
+                <p>Your identity has been successfully verified. You now have full access to all platform features.</p>
+                
+                {% elif kyc.status == 'rejected' %}
+                <i class="fas fa-times-circle" style="font-size: 64px; color: #e74c3c; margin-bottom: 20px;"></i>
+                <h3>Verification Rejected</h3>
+                <p>Your KYC verification was rejected. 
+                    {% if kyc.rejection_reason %}
+                    <br><strong>Reason:</strong> {{ kyc.rejection_reason }}
+                    {% endif %}
+                </p>
+                <a href="{% url 'kyc:verification' %}" class="btn btn-primary" style="margin-top: 20px;">Resubmit Verification</a>
+                
+                {% elif kyc.status == 'additional_info' %}
+                <i class="fas fa-info-circle" style="font-size: 64px; color: #3498db; margin-bottom: 20px;"></i>
+                <h3>Additional Information Required</h3>
+                <p>
+                    {% if kyc.rejection_reason %}
+                    {{ kyc.rejection_reason }}
+                    {% else %}
+                    We need additional information to complete your verification.
+                    {% endif %}
+                </p>
+                <a href="{% url 'kyc:verification' %}" class="btn btn-primary" style="margin-top: 20px;">Provide Additional Information</a>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e7ff;">
+                <p>Submitted on: {{ kyc.submitted_at|date:"M d, Y H:i" }}</p>
+                {% if kyc.reviewed_at %}
+                <p>Reviewed on: {{ kyc.reviewed_at|date:"M d, Y H:i" }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

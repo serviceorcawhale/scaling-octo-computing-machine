@@ -1,0 +1,798 @@
+<!-- transactions.html -->
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Transaction History{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Statistics -->
+    {% comment %} <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="stat-content">
+                <span>Total Deposited</span>
+                <h3>${{ total_deposits|floatformat:2 }}</h3>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+                <span>Total Yield</span>
+                <h3>${{ total_yield|floatformat:2 }}</h3>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="stat-content">
+                <span>Total Withdrawn</span>
+                <h3>${{ total_withdrawn|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div> {% endcomment %}
+
+    <!-- Transactions Table -->
+    <div class="section-header">
+        <h2>Transaction History</h2>
+        <div class="table-actions">
+            <button class="btn btn-secondary btn-sm" onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    {% if transactions %}
+    <div class="transactions-table-container">
+        <table class="transactions-table">
+            <thead>
+                <tr>
+                    <th data-label="Type">Type</th>
+                    <th data-label="Amount">Amount</th>
+                    <th data-label="Date">Date</th>
+                    <th data-label="Status">Status</th>
+                    <th class="action-column" data-label="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr class="transaction-row {{ transaction.type }} status-{{ transaction.status }}">
+                    <td data-label="Type">
+                        <div class="transaction-type">
+                            <span class="type-icon">
+                                <i class="fas 
+                                    {% if transaction.type == 'deposit' %}fa-arrow-down text-success
+                                    {% elif transaction.type == 'withdrawal' %}fa-arrow-up text-danger
+                                    {% else %}fa-coins text-warning{% endif %}"></i>
+                            </span>
+                            <span class="type-text">
+                                {% if transaction.type == 'deposit' %}Deposit
+                                {% elif transaction.type == 'withdrawal' %}Withdrawal
+                                {% else %}Yield{% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td data-label="Amount" class="amount-cell">
+                        <span class="amount {% if transaction.type == 'deposit' or transaction.type == 'yield' %}positive{% else %}negative{% endif %}">
+                            {% if transaction.type == 'deposit' or transaction.type == 'yield' %}+{% else %}-{% endif %}
+                            ${{ transaction.amount|floatformat:2 }}
+                        </span>
+                    </td>
+                    <td data-label="Date">
+                        <span class="transaction-date">
+                            {{ transaction.date|date:"M d, Y" }}<br>
+                            <small>{{ transaction.date|date:"H:i" }}</small>
+                        </span>
+                    </td>
+                    <td data-label="Status">
+                        <span class="status-badge status-{{ transaction.status }}">
+                            {{ transaction.status|title }}
+                        </span>
+                    </td>
+                    <td data-label="Actions" class="action-cell">
+                        <button class="btn-icon" onclick="showTransactionDetails({{ forloop.counter0 }})" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                
+                <!-- Details row (hidden by default) -->
+                <tr class="transaction-details-row" id="details-{{ forloop.counter0 }}" style="display: none;">
+                    <td colspan="5">
+                        <div class="transaction-details-content">
+                            <div class="detail-item">
+                                <strong>Transaction ID:</strong> 
+                                <span>#{{ forloop.counter }}</span>
+                            </div>
+                            {% if transaction.txn_hash %}
+                            <div class="detail-item">
+                                <strong>Transaction Hash:</strong> 
+                                <span class="txn-hash">{{ transaction.txn_hash|truncatechars:30 }}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('{{ transaction.txn_hash }}')" title="Copy Hash">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                            {% if transaction.destination_address %}
+                            <div class="detail-item">
+                                <strong>Destination:</strong> 
+                                <span class="wallet-address">{{ transaction.destination_address|truncatechars:25 }}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('{{ transaction.destination_address }}')" title="Copy Address">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                            <div class="detail-item">
+                                <strong>Currency:</strong> 
+                                <span>{{ transaction.currency }}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button class="btn btn-secondary" id="prev-btn" disabled>
+            <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <span class="page-info" id="page-info">
+            Page 1 of {{ total_pages }}
+        </span>
+        <button class="btn btn-secondary" id="next-btn" {% if total_pages <= 1 %}disabled{% endif %}>
+            Next <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-history"></i>
+        <h3>No Transactions Yet</h3>
+        <p>Your transaction history will appear here</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Copy to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied to clipboard!', 'success');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('Failed to copy', 'error');
+    });
+}
+
+// Show transaction details
+function showTransactionDetails(rowIndex) {
+    const detailsRow = document.getElementById('details-' + rowIndex);
+    const isVisible = detailsRow.style.display !== 'none';
+    
+    // Hide all other detail rows
+    document.querySelectorAll('.transaction-details-row').forEach(row => {
+        row.style.display = 'none';
+    });
+    
+    // Toggle this row
+    detailsRow.style.display = isVisible ? 'none' : 'table-row';
+}
+
+
+// Initialize jsPDF
+const { jsPDF } = window.jspdf;
+
+// Copy to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied to clipboard!', 'success');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('Failed to copy', 'error');
+    });
+}
+
+// Export to PDF function
+function exportToPDF() {
+    showToast('Generating PDF...', 'info');
+    
+    // Create new PDF document
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Transaction History', 14, 22);
+    
+    // Add date
+    doc.setFontSize(11);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Add user info
+    doc.text(`User: {{ user.username }}`, 14, 38);
+    
+    // Prepare table data
+    const tableColumn = ["Type", "Amount", "Date", "Status"];
+    const tableRows = [];
+    
+    // Get all visible transactions
+    const visibleRows = document.querySelectorAll('.transaction-row:not([style*="display: none"])');
+    
+    visibleRows.forEach(row => {
+        const type = row.querySelector('.type-text').textContent.trim();
+        const amount = row.querySelector('.amount').textContent.trim();
+        const date = row.querySelector('.transaction-date').textContent.trim().replace(/\s+/g, ' ');
+        const status = row.querySelector('.status-badge').textContent.trim();
+        
+        const transactionData = [
+            type,
+            amount,
+            date,
+            status
+        ];
+        
+        tableRows.push(transactionData);
+    });
+    
+    // Add summary section
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Summary', 14, 50);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Total Deposits: ${{ total_deposits|floatformat:2 }}`, 14, 58);
+    doc.text(`Total Withdrawn: ${{ total_withdrawn|floatformat:2 }}`, 14, 66);
+    doc.text(`Total Yield: ${{ total_yield|floatformat:2 }}`, 14, 74);
+    
+    // Add transactions table
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 80,
+        theme: 'grid',
+        styles: {
+            fontSize: 9,
+            cellPadding: 3,
+            overflow: 'linebreak'
+        },
+        headStyles: {
+            fillColor: [66, 139, 202],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+            fillColor: [240, 240, 240]
+        },
+        columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 45 },
+            3: { cellWidth: 25 }
+        },
+        didDrawPage: function(data) {
+            // Add page number
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(
+                `Page ${data.pageNumber}`, 
+                doc.internal.pageSize.width / 2, 
+                doc.internal.pageSize.height - 10,
+                { align: 'center' }
+            );
+        }
+    });
+    
+    // Add footer
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Generated by Crypto Investment Platform', 14, finalY);
+    
+    // Save the PDF
+    const filename = `transactions-{{ user.username }}-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(filename);
+    
+    showToast('PDF downloaded successfully!', 'success');
+}
+
+// Show transaction details
+function showTransactionDetails(rowIndex) {
+    const detailsRow = document.getElementById('details-' + rowIndex);
+    const isVisible = detailsRow.style.display !== 'none';
+    
+    // Hide all other detail rows
+    document.querySelectorAll('.transaction-details-row').forEach(row => {
+        row.style.display = 'none';
+    });
+    
+    // Toggle this row
+    detailsRow.style.display = isVisible ? 'none' : 'table-row';
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(toast);
+    
+    // Show with animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Remove after delay
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Simple filtering (for demonstration)
+function filterTransactions(type) {
+    const rows = document.querySelectorAll('.transaction-row');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        if (type === 'all' || row.classList.contains(type)) {
+            row.style.display = 'table-row';
+            visibleCount++;
+            // Hide the next details row too
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('transaction-details-row')) {
+                nextRow.style.display = 'none';
+            }
+        } else {
+            row.style.display = 'none';
+            // Hide the next details row too
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('transaction-details-row')) {
+                nextRow.style.display = 'none';
+            }
+        }
+    });
+    
+    // Update filter button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    showToast(`Showing ${visibleCount} ${type} transactions`, 'info');
+}
+
+// Add filter buttons for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    // Create mobile filter buttons
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'mobile-filters';
+    filterContainer.innerHTML = `
+        <button class="filter-btn active" onclick="filterTransactions('all')">All</button>
+        <button class="filter-btn" onclick="filterTransactions('deposit')">Deposits</button>
+        <button class="filter-btn" onclick="filterTransactions('withdrawal')">Withdrawals</button>
+        <button class="filter-btn" onclick="filterTransactions('yield')">Yields</button>
+    `;
+    
+    // Insert before the table
+    const tableContainer = document.querySelector('.transactions-table-container');
+    if (tableContainer) {
+        tableContainer.parentNode.insertBefore(filterContainer, tableContainer);
+    }
+    
+    // Update pagination buttons based on actual page count
+    const totalPages = {{ total_pages|default:1 }};
+    const nextBtn = document.getElementById('next-btn');
+    
+    if (totalPages <= 1) {
+        nextBtn.disabled = true;
+    }
+});
+
+</script>
+
+<style>
+/* Transactions Table Styles */
+.transactions-table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: white;
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 300px;
+}
+
+.transactions-table th {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.transactions-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+.transaction-row:hover {
+    background: #f8f9fa;
+}
+
+/* Transaction Type */
+.transaction-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-icon .fas {
+    font-size: 14px;
+}
+
+/* Amount Styles */
+.amount-cell {
+    font-weight: 600;
+}
+
+.amount.positive {
+    color: #28a745;
+}
+
+.amount.negative {
+    color: #dc3545;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-credited {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-expired {
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Action Buttons */
+.action-cell {
+    text-align: center;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+/* Transaction Details */
+.transaction-details-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-item strong {
+    min-width: 120px;
+    color: #495057;
+}
+
+.btn-copy {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.btn-copy:hover {
+    color: #495057;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+}
+
+.page-info {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Mobile Filters */
+.mobile-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    min-width: 250px;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast-success {
+    border-left: 4px solid #28a745;
+}
+
+.toast-error {
+    border-left: 4px solid #dc3545;
+}
+
+.toast-info {
+    border-left: 4px solid #17a2b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .transactions-table {
+        font-size: 14px;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+        padding: 8px 10px;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .transactions-table th,
+    .transactions-table td {
+        padding: 6px 8px;
+    }
+    
+    .type-text {
+        display: none;
+    }
+    
+    .transaction-date small {
+        display: none;
+    }
+}
+
+@media (max-width: 400px) {
+    .transactions-table {
+        font-size: 12px;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+        padding: 4px 6px;
+    }
+    
+    .amount {
+        font-size: 12px;
+    }
+    
+    .status-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+    
+    .type-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .type-icon .fas {
+        font-size: 12px;
+    }
+}
+
+/* Very small screens (300px) */
+@media (max-width: 300px) {
+    .transactions-table-container {
+        margin: 10px -15px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .transactions-table {
+        font-size: 11px;
+        min-width: 280px;
+    }
+    
+    .transactions-table th,
+    .transactions-table td {
+        padding: 4px 4px;
+    }
+    
+    .transaction-type {
+        gap: 4px;
+    }
+    
+    .type-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .amount {
+        font-size: 11px;
+    }
+    
+    .mobile-filters {
+        gap: 4px;
+    }
+    
+    .filter-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Stack table cells on very small screens */
+@media (max-width: 300px) {
+    .transactions-table thead {
+        display: none;
+    }
+    
+    .transactions-table tr {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px;
+    }
+    
+    .transactions-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 4px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .transactions-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .transactions-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #495057;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    
+    .transaction-details-row td {
+        display: block;
+    }
+}
+</style>
+{% endblock %}

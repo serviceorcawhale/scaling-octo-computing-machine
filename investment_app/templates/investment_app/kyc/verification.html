@@ -1,0 +1,518 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}KYC Verification{% endblock %}
+
+{% block styles %}
+<style>
+.kyc-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.kyc-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+    border: 1px solid #e0e7ff;
+}
+
+.kyc-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.kyc-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.kyc-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+.kyc-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.kyc-progress::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e0e7ff;
+    z-index: 1;
+}
+
+.kyc-step {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.kyc-step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+    color: #7f8c8d;
+}
+
+.kyc-step.active .kyc-step-circle {
+    background: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+.kyc-step-label {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.kyc-step.active .kyc-step-label {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 65%;
+    padding: 10px 15px;
+    border: 1px solid #e0e7ff;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-text {
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.required::after {
+    content: '*';
+    color: #e74c3c;
+    margin-left: 4px;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: block;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.upload-preview {
+    margin-top: 10px;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.upload-preview img {
+    max-width: 100%;
+    height: auto;
+    max-height: 150px;
+    border-radius: 6px;
+    border: 1px solid #e0e7ff;
+    object-fit: contain;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .upload-preview img {
+        max-width: 280px;
+        max-height: 120px;
+    }
+    
+    .form-control {
+        width: 100%;
+    }
+    
+    .kyc-container {
+        padding: 15px;
+    }
+    
+    .kyc-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-preview img {
+        max-width: 250px;
+        max-height: 100px;
+    }
+}
+
+@media (max-width: 350px) {
+    .upload-preview img {
+        max-width: 220px;
+        max-height: 90px;
+    }
+}
+
+@media (max-width: 300px) {
+    .upload-preview img {
+        max-width: 200px;
+        max-height: 80px;
+    }
+}
+
+/* Gallery style for multiple uploads */
+.upload-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.upload-gallery-item {
+    position: relative;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.upload-gallery-item img {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #e0e7ff;
+}
+
+.upload-gallery-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Loading state for uploads */
+.upload-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(52, 152, 219, 0.3);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.upload-status {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.kyc-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.kyc-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.kyc-verified {
+    background: #d4edda;
+    color: #155724;
+}
+
+.kyc-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kyc-container">
+    <div class="kyc-card">
+        <div class="kyc-header">
+            <h1>Identity Verification (KYC)</h1>
+            <p>Verify your identity to access all platform features</p>
+            
+            {% if kyc %}
+            <div class="kyc-status {{ kyc.get_status_class }}">
+                Status: {{ kyc.get_status_display }}
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if kyc and kyc.status == 'rejected' and kyc.rejection_reason %}
+        <div class="alert alert-warning">
+            <strong>Rejection Reason:</strong> {{ kyc.rejection_reason }}
+        </div>
+        {% endif %}
+        
+        <div class="alert alert-info">
+            <strong>Note:</strong> Please ensure all documents are clear and valid. The verification process may take 24-48 hours.
+        </div>
+        
+        <div class="kyc-progress">
+            <div class="kyc-step active">
+                <div class="kyc-step-label">Personal Info</div>
+            </div>
+            <div class="kyc-step active">
+                <div class="kyc-step-label">Document Upload</div>
+            </div>
+            <div class="kyc-step active">
+                <div class="kyc-step-label">Review</div>
+            </div>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label required">Document Type</label>
+                {{ form.document_type }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Document Number</label>
+                {{ form.document_number }}
+                <div class="form-text">Enter the number from your selected document</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Date of Birth</label>
+                {{ form.date_of_birth }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Address</label>
+                {{ form.address }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">City</label>
+                {{ form.city }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Country</label>
+                {{ form.country }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Postal Code</label>
+                {{ form.postal_code }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Document Front</label>
+                {{ form.document_front }}
+                <div class="form-text">Upload a clear image of the front of your document</div>
+                <div class="upload-preview" id="frontPreview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" id="backLabel">Document Back</label>
+                {{ form.document_back }}
+                <div class="form-text" id="backText">Upload a clear image of the back of your document (required for ID cards)</div>
+                <div class="upload-preview" id="backPreview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label required">Selfie with Document</label>
+                {{ form.selfie_with_document }}
+                <div class="form-text">Take a selfie while holding your document. Make sure your face and the document are clearly visible.</div>
+                <div class="upload-preview" id="selfiePreview"></div>
+            </div>
+            
+            <button type="submit" class="btn-primary">Submit Verification</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Document type change handler
+    const documentType = document.getElementById('id_document_type');
+    const backLabel = document.getElementById('backLabel');
+    const backText = document.getElementById('backText');
+    
+    function toggleBackRequired() {
+        if (documentType.value === 'id_card') {
+            backLabel.classList.add('required');
+        } else {
+            backLabel.classList.remove('required');
+        }
+    }
+    
+    if (documentType) {
+        documentType.addEventListener('change', toggleBackRequired);
+        toggleBackRequired(); // Initial check
+    }
+    
+    // Image preview handlers with proper sizing
+    function setupImagePreview(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        
+        if (!input || !preview) return;
+        
+        input.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Create a properly sized image for preview
+                        const containerWidth = preview.offsetWidth;
+                        const maxWidth = Math.min(containerWidth, 300); // Max 300px even on larger screens
+                        
+                        let displayWidth = img.width;
+                        let displayHeight = img.height;
+                        
+                        // Scale down if needed
+                        if (displayWidth > maxWidth) {
+                            const ratio = maxWidth / displayWidth;
+                            displayWidth = maxWidth;
+                            displayHeight = displayHeight * ratio;
+                        }
+                        
+                        // Ensure height isn't too large either
+                        if (displayHeight > 150) {
+                            const ratio = 150 / displayHeight;
+                            displayHeight = 150;
+                            displayWidth = displayWidth * ratio;
+                        }
+                        
+                        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: ${displayWidth}px; height: ${displayHeight}px;">`;
+                    };
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+    
+    setupImagePreview('id_document_front', 'frontPreview');
+    setupImagePreview('id_document_back', 'backPreview');
+    setupImagePreview('id_selfie_with_document', 'selfiePreview');
+    
+    // Handle window resize to adjust image previews
+    window.addEventListener('resize', function() {
+        // Re-process all image previews on resize
+        const previews = document.querySelectorAll('.upload-preview');
+        previews.forEach(preview => {
+            const img = preview.querySelector('img');
+            if (img) {
+                const naturalWidth = img.naturalWidth;
+                const naturalHeight = img.naturalHeight;
+                const containerWidth = preview.offsetWidth;
+                const maxWidth = Math.min(containerWidth, 300);
+                
+                let displayWidth = naturalWidth;
+                let displayHeight = naturalHeight;
+                
+                if (displayWidth > maxWidth) {
+                    const ratio = maxWidth / displayWidth;
+                    displayWidth = maxWidth;
+                    displayHeight = displayHeight * ratio;
+                }
+                
+                if (displayHeight > 150) {
+                    const ratio = 150 / displayHeight;
+                    displayHeight = 150;
+                    displayWidth = displayWidth * ratio;
+                }
+                
+                img.style.width = `${displayWidth}px`;
+                img.style.height = `${displayHeight}px`;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

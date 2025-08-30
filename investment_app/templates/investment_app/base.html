@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orcawhale</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'investment_app/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="nav-logo">
+                <i class="fas fa-coins"></i> Orcawhale<div class="logo">
+            <span class="logo-icon">🐋</span>
+        </div>
+            </a>
+            <div class="nav-menu" id="nav-menu">
+                <a href="{% url 'index' %}" class="nav-link">Home</a>
+                <a href="{% url 'index' %}#plans" class="nav-link">Plans</a>
+                <a href="{% url 'index' %}#faq" class="nav-link">FAQ</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'register' %}" class="nav-link btn-primary">Register</a>
+                {% endif %}
+            </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Orcawhale</h3>
+                <p>Grow your crypto assets with our secure investment platform.</p>
+                {% comment %} <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div> {% endcomment %}
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'index' %}#plans">Investment Plans</a>
+                <a href="{% url 'index' %}#faq">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <a href="{% url 'terms' %}">Terms of Service</a>
+                <a href="{% url 'privacy' %}">Privacy Policy</a>
+                {% comment %} <a href="#">Cookie Policy</a> {% endcomment %}
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p><i class="fas fa-envelope"></i> service.orcawhale@hotmail.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Orca Whale Investment. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'investment_app/js/main.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,287 @@
+{% extends 'investment_app/base_dashboard.html' %}
+{% load static %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="main-column">
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon primary">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>Total Balance</h3>
+                    <p>${{ profile.total_balance|floatformat:2 }}</p>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon info">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>Principal Balance</h3>
+                    <p>${{ profile.principal_balance|floatformat:2 }}</p>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>Earned Balance</h3>
+                    <p>${{ profile.earned_balance|floatformat:2 }}</p>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon warning">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="summary-content">
+                    <h3>Total Withdrawn</h3>
+                    <p>${{ profile.total_withdrawn|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Earnings Overview (Last 7 Days)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="earningsChart" data-chart='{{ chart_data }}'></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Activity</h2>
+                <a href="{% url 'transactions' %}" class="btn btn-secondary">View All</a>
+            </div>
+            
+            <div class="activity-list">
+                {% for transaction in recent_transactions %}
+                <div class="activity-item">
+                    <div class="activity-icon 
+                        {% if transaction.type == 'deposit' %}deposit
+                        {% elif transaction.type == 'withdrawal' %}withdrawal
+                        {% else %}yield{% endif %}">
+                        <i class="fas 
+                            {% if transaction.type == 'deposit' %}fa-arrow-down
+                            {% elif transaction.type == 'withdrawal' %}fa-arrow-up
+                            {% else %}fa-coins{% endif %}"></i>
+                    </div>
+                    
+                    <div class="activity-details">
+                        <h4>
+                            {% if transaction.type == 'deposit' %}Deposit
+                            {% elif transaction.type == 'withdrawal' %}Withdrawal
+                            {% else %}Yield Credit{% endif %}
+                        </h4>
+                        <p>{{ transaction.amount }} {{ transaction.currency }}</p>
+                    </div>
+                    
+                    <div class="activity-meta">
+                        <span class="status status-{{ transaction.status }}">{{ transaction.status }}</span>
+                        <div class="activity-time">{{ transaction.date|timesince }} ago</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <h3>No recent activity</h3>
+                    <p>Your transaction history will appear here</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-column">
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            
+            <div class="quick-actions-grid">
+                <a href="{% url 'deposit' %}" class="quick-action-btn">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Deposit</span>
+                </a>
+                
+                <a href="{% url 'withdraw' %}" class="quick-action-btn">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Withdraw</span>
+                </a>
+                
+                <a href="{% url 'invest' %}" class="quick-action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Invest</span>
+                </a>
+                
+                <a href="{% url 'transactions' %}" class="quick-action-btn">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Account Summary -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Account Summary</h2>
+            </div>
+            
+            <div class="account-summary">
+                <div class="summary-item">
+                    <span>Member since</span>
+                    <strong>{{ user.date_joined|date:"M Y" }}</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Total Investments</span>
+                    <strong>{{ investments_count }}</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Active Deposits</span>
+                    <strong>{{ active_deposits }}</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Pending Withdrawals</span>
+                    <strong>{{ pending_withdrawals }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Yield -->
+<div class="dashboard-card">
+    <div class="card-header">
+        <h2 class="card-title">Daily Yield</h2>
+    </div>
+    
+    <div class="yield-info">
+        <div class="yield-amount">
+            <i class="fas fa-coins text-warning"></i>
+            <div>
+                <span>Today's Yield</span>
+                <strong>${{ today_yield|floatformat:2 }}</strong>
+                {% if expected_daily_yield > 0 %}
+                <small>Expected: ${{ expected_daily_yield|floatformat:2 }}/day</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if next_yield_time %}
+        <div class="yield-timing">
+            <i class="fas fa-clock text-info"></i>
+            <div>
+                <span>Next Yield In</span>
+                <strong>{{ next_yield_time|timeuntil }}</strong>
+                <small>at {{ next_yield_time|time }}</small>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="yield-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ yield_progress }}%"></div>
+            </div>
+            <span>{{ yield_progress }}% to next yield</span>
+        </div>
+        
+        {% if not has_active_investments %}
+        <div class="yield-alert">
+            <i class="fas fa-info-circle"></i>
+            <span>No active investments. <a href="{% url 'invest' %}">Start investing</a> to earn yields.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Enhanced chart initialization
+document.addEventListener('DOMContentLoaded', function() {
+    const earningsChart = document.getElementById('earningsChart');
+    if (earningsChart && typeof Chart !== 'undefined') {
+        const ctx = earningsChart.getContext('2d');
+        const chartData = JSON.parse(earningsChart.dataset.chart || '[]');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.map(item => {
+                    const date = new Date(item.date);
+                    return date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                }),
+                datasets: [{
+                    label: 'Daily Yield ($)',
+                    data: chartData.map(item => item.yield),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 14 },
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            padding: 8
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

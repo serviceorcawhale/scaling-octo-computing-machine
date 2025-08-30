@@ -1,0 +1,46 @@
+{% extends 'investment_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+    <div class="auth-card" style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center;">
+        <div class="auth-header" style="margin-bottom: 2rem;">
+            <a href="{% url 'index' %}" class="auth-logo" style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-coins"></i> CryptoInvest
+            </a>
+            <div class="verification-icon" style="font-size: 3rem; color: var(--success-color); margin: 1.5rem 0;">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h1 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Verify Your Email</h1>
+            <p style="color: var(--text-secondary); margin: 0;">
+                We've sent a verification link to your email address
+            </p>
+        </div>
+
+        <div class="verification-content">
+            <p style="color: var(--text-secondary; margin-bottom: 1.5rem;">
+                Please check your inbox and click on the verification link to activate your account.
+                If you don't see the email, check your spam folder.
+            </p>
+            
+            <div class="resend-section" style="margin: 2rem 0;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Didn't receive the email?
+                </p>
+                <!-- Change to GET request or ensure proper CSRF handling -->
+                <a href="{% url 'resend_verification' %}" class="btn btn-secondary">
+                    Resend Verification Email
+                </a>
+            </div>
+        </div>
+
+        <div class="auth-footer" style="padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); margin: 0;">
+                <a href="{% url 'login' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                    Return to Sign In
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
